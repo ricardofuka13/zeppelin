@@ -24,7 +24,7 @@ function by(col,id){return S[col].find(function(x){return x.id===id})}
 function norm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
 
 /* ---------- banco de dados (Supabase) ---------- */
-var sb=null, sbCanal=null, refreshT=null, logadoId;
+var sb=null, sbCanal=null, refreshT=null, logadoId, fatal='';
 var LIM={pedidos:1500,caixa:4000};
 function n2(v){return v==null?0:Number(v)}
 var FROM={
@@ -207,7 +207,7 @@ function render(){
   var a=document.activeElement, id=a&&a.id, ss=null, se=null;
   if(a&&(a.id==='q')){ss=a.selectionStart;se=a.selectionEnd}
   $('#tabs').innerHTML=TABS.map(function(t){return '<button data-act="tab" data-id="'+t[0]+'"'+(S.tab===t[0]?' aria-current="page"':'')+'>'+t[1]+'</button>'}).join('');
-  $('#main').innerHTML=VIEWS[S.tab]();
+  $('#main').innerHTML=fatal||VIEWS[S.tab]();
   if(id){var el=document.getElementById(id);if(el&&el!==a){el.focus();if(ss!=null&&el.setSelectionRange){try{el.setSelectionRange(ss,se)}catch(e){}}}}
 }
 
@@ -680,10 +680,10 @@ render();
 (function(){
   var cfg=window.ZEPPELIN_CONFIG||{};
   if(!cfg.url||!cfg.anonKey||/COLE_AQUI/.test(cfg.url+cfg.anonKey)){
-    $('#main').innerHTML='<div class="empty"><b>Falta configurar o Supabase</b>Preencha o arquivo config.js com a URL e a chave anon do seu projeto. O passo a passo está no README.</div>';
-    return;
+    fatal='<div class="empty"><b>Falta configurar o Supabase</b>O arquivo config.js ainda está com os valores de exemplo. No GitHub, abra o arquivo config.js, clique no lápis (Edit), cole a URL e a chave anon do seu projeto Supabase (Project Settings &gt; API) e clique em Commit changes. O site atualiza em cerca de 1 minuto. Depois, atualize esta página com Ctrl+F5.</div>';
+    render();return;
   }
-  if(!window.supabase){$('#main').innerHTML='<div class="empty"><b>Não foi possível carregar o Supabase</b>Verifique a conexão com a internet e recarregue a página.</div>';return}
+  if(!window.supabase){fatal='<div class="empty"><b>Não foi possível carregar o Supabase</b>Verifique a conexão com a internet e recarregue a página com Ctrl+F5.</div>';render();return}
   sb=window.supabase.createClient(cfg.url,cfg.anonKey);
   $('#lf').addEventListener('submit',function(e){
     e.preventDefault();
