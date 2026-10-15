@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Zeppelin Gestão</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24'%3E%3Cellipse cx='20' cy='10' rx='17' ry='7.5' fill='%23d92d20'/%3E%3Cpath d='M5 6 1 1v9zM5 14 1 19v-9z' fill='%231d63d8'/%3E%3Crect x='16' y='16' width='8' height='5' rx='1.5' fill='%231f2328'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top"><div class="top-in">
+  <div class="brand">
+    <svg width="40" height="24" viewBox="0 0 40 24" aria-hidden="true"><ellipse cx="20" cy="10" rx="17" ry="7.5" fill="var(--accent)"/><path d="M5 6 1 1v9zM5 14 1 19v-9z" fill="var(--sky)"/><rect x="16" y="16" width="8" height="5" rx="1.5" fill="var(--ink)"/><path d="M9 10h22" stroke="var(--on-accent)" stroke-width="1.4" opacity=".7"/></svg>
+    <span>Zeppelin <small>pipas &amp; fogos</small></span>
+  </div>
+  <nav id="tabs" aria-label="Seções"></nav>
+  <button type="button" class="btn sm" id="sair" data-act="sair" hidden>Sair</button>
+</div></header>
+
+<main id="main"></main>
+
+<div id="modal" class="overlay" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <div class="sheet-h"><h2 id="mt"></h2><button type="button" class="btn sm" data-act="close">Fechar</button></div>
+    <form id="mf" autocomplete="off"><div id="mb" class="fields"></div><div class="sheet-f" id="mfoot"></div></form>
+  </div>
+</div>
+
+<div id="login" class="overlay" hidden>
+  <div class="sheet" style="max-width:380px" role="dialog" aria-modal="true" aria-labelledby="lt">
+    <h2 id="lt" style="margin-bottom:4px">Zeppelin</h2>
+    <p class="hint" style="margin:0 0 14px">Entre para acessar o sistema.</p>
+    <form id="lf">
+      <div class="fields">
+        <label>E-mail<input id="le" type="email" autocomplete="username" required></label>
+        <label>Senha<input id="lp" type="password" autocomplete="current-password" required></label>
+        <p id="lerr" class="hint" style="color:var(--bad);margin:0" hidden></p>
+      </div>
+      <div class="sheet-f"><button type="submit" class="btn primary">Entrar</button></div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
