@@ -121,3 +121,7 @@ a.btn{text-decoration:none;display:inline-block}
   #sair{order:2}
   nav{order:3;flex-basis:100%}
 }
+
+.fone{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+a.wa{display:inline-flex;border-radius:50%;line-height:0}
+a.wa:hover{filter:brightness(.92)}

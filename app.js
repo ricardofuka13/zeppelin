@@ -182,7 +182,7 @@ function vClientes(){
   l.map(function(c){
     var ps=vendasValidas().filter(function(p){return p.clienteId===c.id});
     var tot=ps.reduce(function(a,p){return a+p.total},0), dv=ps.filter(function(p){return p.status==='pendente'}).reduce(function(a,p){return a+p.total},0);
-    return '<tr><td>'+esc(c.nome)+(c.obs?'<div class="hint">'+esc(c.obs)+'</div>':'')+'</td><td>'+esc(c.telefone||'—')+'</td><td>'+esc(c.cidade||'—')+(c.endereco?'<div class="hint">'+esc(c.endereco)+'</div>':'')+'</td><td class="r">'+ps.length+'</td><td class="r">'+brl(tot)+'</td><td class="r">'+(dv?'<span class="pill warn">'+brl(dv)+'</span>':'—')+'</td><td class="acts">'+
+    return '<tr><td>'+esc(c.nome)+(c.obs?'<div class="hint">'+esc(c.obs)+'</div>':'')+'</td><td>'+(c.telefone?'<span class="fone">'+esc(c.telefone)+waIcon(c.telefone,c.nome)+'</span>':'—')+'</td><td>'+esc(c.cidade||'—')+(c.endereco?'<div class="hint">'+esc(c.endereco)+'</div>':'')+'</td><td class="r">'+ps.length+'</td><td class="r">'+brl(tot)+'</td><td class="r">'+(dv?'<span class="pill warn">'+brl(dv)+'</span>':'—')+'</td><td class="acts">'+
       '<button class="btn sm" data-act="novo-pedido" data-id="'+c.id+'">Pedido</button><button class="btn sm" data-act="edit-cliente" data-id="'+c.id+'">Editar</button>'+
       '<button class="btn sm danger'+(S.armed==='delc'+c.id?' armed':'')+'" data-act="del-cliente" data-id="'+c.id+'" data-confirm="1">'+(S.armed==='delc'+c.id?'Confirmar?':'Excluir')+'</button></td></tr>'}).join('')+'</tbody></table></div>';
 }
@@ -317,6 +317,18 @@ function isEntrega(p){return !!(p&&p.entrega&&p.entrega.tipo==='Entrega')}
 function entPend(){return vendasValidas().filter(function(p){return isEntrega(p)&&!p.entregue})}
 function plain(n){return brl(n).replace(/ /g,' ')}
 function digits(s){return String(s||'').replace(/\D/g,'')}
+function waNum(tel){
+  var d=digits(tel), dd=digits(loja().ddd).slice(0,2);
+  if(d.length>=8&&d.length<=9&&dd.length===2)d=dd+d;
+  if(d.length<10)return '';
+  if(d.length<=11)d='55'+d;
+  return d;
+}
+function waIcon(tel,nome){
+  var n=waNum(tel);if(!n)return '';
+  return '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/'+n+'" title="Abrir conversa no WhatsApp" aria-label="Abrir conversa no WhatsApp com '+esc(nome||'o cliente')+'">'+
+    '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#25D366"/><path d="M12 5.2a6.8 6.8 0 0 0-5.8 10.3L5.2 18.8l3.4-1a6.8 6.8 0 1 0 3.4-12.6z" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M9.6 9.1c.2-.3.5-.3.7 0l.6 1.2c.1.2 0 .4-.1.6l-.4.5c.5 1 1.3 1.8 2.3 2.3l.5-.4c.2-.2.4-.2.6-.1l1.2.6c.3.2.3.5 0 .8-.6.8-1.5.9-2.4.5a6.8 6.8 0 0 1-3.3-3.2c-.4-.9-.3-1.8.3-2.8z" fill="#fff"/></svg></a>';
+}
 function slug(s){return norm(s).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'cliente'}
 function fmtn(n){return (Number(n)||0).toFixed(2).replace('.',',')}
 function daysAgo(n){var d=new Date();d.setDate(d.getDate()-n);return d.toLocaleDateString('sv-SE')}
@@ -336,8 +348,7 @@ function reciboTexto(p){
 }
 function mRecibo(p){
   if(!p)return;
-  var cli=by('clientes',p.clienteId), tel=digits(cli&&cli.telefone), txt=reciboTexto(p);
-  if(tel&&tel.length<=11)tel='55'+tel;
+  var cli=by('clientes',p.clienteId), tel=waNum(cli&&cli.telefone), txt=reciboTexto(p);
   openModal('Recibo do pedido #'+p.numero,'<div class="receipt">'+esc(txt)+'</div><p class="hint" style="margin:0">Para enviar o PDF, use Enviar PDF (no celular) ou baixe o arquivo e anexe na conversa com o cliente. O botão WhatsApp abre a conversa já com este texto.</p>','',null);
   $('#mfoot').innerHTML='<button type="button" class="btn" data-act="close">Fechar</button><button type="button" class="btn" data-act="copiar" data-id="'+p.id+'">Copiar texto</button>'+
     '<a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+tel+'?text='+encodeURIComponent(txt)+'">WhatsApp</a>'+(navigator.canShare?'<button type="button" class="btn" data-act="pdf-share" data-id="'+p.id+'">Enviar PDF</button>':'')+'<button type="button" class="btn primary" data-act="pdf" data-id="'+p.id+'">Baixar PDF</button>';
@@ -458,8 +469,9 @@ function mLoja(){
     fld('nome','Nome da loja',l.nome||'Zeppelin')+
     '<label>Logo da loja (imagem PNG, JPG ou SVG)<input type="file" id="logoFile" accept="image/*"></label><div id="logoPrev" class="row"></div>'+
     '<div class="grid2">'+fld('telefone','Telefone / WhatsApp',l.telefone,'tel')+fld('pix','Chave Pix',l.pix)+'</div>'+
+    fld('ddd','DDD padrão (usado em telefones de clientes sem DDD)',l.ddd,'text','inputmode="numeric" maxlength="2"')+
     fld('endereco','Endereço da loja',l.endereco)+fld('rodape','Mensagem no rodapé',l.rodape||'Obrigado pela preferência!'),'Salvar',function(fd){
-      return guard(store.set('config','loja',{nome:String(fd.get('nome')).trim(),logo:logoDraft,telefone:String(fd.get('telefone')).trim(),pix:String(fd.get('pix')).trim(),endereco:String(fd.get('endereco')).trim(),rodape:String(fd.get('rodape')).trim()}));
+      return guard(store.set('config','loja',{nome:String(fd.get('nome')).trim(),logo:logoDraft,telefone:String(fd.get('telefone')).trim(),pix:String(fd.get('pix')).trim(),ddd:digits(fd.get('ddd')).slice(0,2),endereco:String(fd.get('endereco')).trim(),rodape:String(fd.get('rodape')).trim()}));
     });
   logoPrev();
 }
